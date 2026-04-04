@@ -16,7 +16,8 @@ The topics and the content is intended to grow over time
 
 ## About me
 
-**Kratika Jain** — Engineering leader with 15+ years of experience designing and building systems across global fintech ecosystems.
+**Kratika Jain**
+I am an Engineering leader with 15+ years of experience designing and building systems across global fintech ecosystems.
 
 [LinkedIn](https://www.linkedin.com/in/kratika-jain-em/) | [Medium](https://medium.com/@kratikasays)
 
