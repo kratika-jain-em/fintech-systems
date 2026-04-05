@@ -139,7 +139,7 @@ public PaymentResponse processPayment(...) {
 
 > Few common idempotency-approaches are discussed next.
 
-### Idempotency approaches
+## Idempotency approaches
 
 1. Database-backed idempotency (recommended for most teams) - Store idempotency keys in the same relational database as your payment records. Use a single `@Transactional` method to commit both atomically. This approach makes systems simple, consistent, auditable, easy to query for debugging.
  
