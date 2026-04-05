@@ -139,9 +139,12 @@ public PaymentResponse processPayment(...) {
 
 > Few common idempotency-approaches are discussed next.
 
+---
+
 ## Idempotency approaches
 
-1. Database-backed idempotency (recommended for most teams) - Store idempotency keys in the same relational database as your payment records. Use a single `@Transactional` method to commit both atomically. This approach makes systems simple, consistent, auditable, easy to query for debugging.
+### Database-backed idempotency (recommended for most teams)
+Store idempotency keys in the same relational database as your payment records. Use a single `@Transactional` method to commit both atomically. This approach makes systems simple, consistent, auditable, easy to query for debugging.
  
 **Fits:** Most fintech systems, particularly where payment volume is in the thousands to low millions per day.
  
@@ -149,7 +152,8 @@ public PaymentResponse processPayment(...) {
 
 ---
 
-2. Redis-backed idempotency with outbox pattern - Use Redis `SET NX` as the distributed lock for fast key acquisition, combined with a transactional outbox to ensure the payment event is durably committed before the Redis key is marked complete.
+### Redis-backed idempotency with outbox pattern
+Use Redis `SET NX` as the distributed lock for fast key acquisition, combined with a transactional outbox to ensure the payment event is durably committed before the Redis key is marked complete.
  
 ```java
 @Service
@@ -197,8 +201,8 @@ public class RedisIdempotencyService {
 **Limitations:** Redis is not durable by default. A crash between payment processing and result storage can still yield duplicates. Use Redis with AOF persistence and pair with a reconciliation backstop. Do not use this as your only durability layer.
 
 ---
-3. Idempotency at the PSP level
- 
+
+### Idempotency at the PSP level
 Most major PSPs support idempotency keys natively. Idempotency key is passed downstream for PSP and they guarantee deduplication on their side.
  
 ```java
