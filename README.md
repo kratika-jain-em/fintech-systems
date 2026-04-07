@@ -6,20 +6,17 @@ A structured knowledge library on building systems in fintech, covering architec
 
 ## About This Repository
 
-Financial systems carry a different kind of weight. A bug isn't just a bug, it's a duplicate charge, a missed settlement, a compliance breach. The engineering decisions made in fintech have consequences that most software domains simply don't face.
+Financial systems carry a different kind of weight. A bug is not just a defect; it is a duplicate charge, a missed settlement, a reconciliation break, or a regulatory exposure.
 
-This repository is a curated collection of technical writing on how these systems are designed, where they fail, and what the right design decisions look like under real constraints. 
-I will try to cover most of the technical aspects of fintech engineering, from distributed ledger systems to payment processing internals like KYC, FX, Reconciliation etc, to common failures and trade-off strategies. 
-The topics and the content is intended to grow over time
+This repository focuses on how real-world fintech systems are designed, where they fail, and what engineering decisions actually matter when money is involved. The goal is not to document "how systems should work" in theory, but how they behave under failure, scale, and external dependencies such as banks, PSPs, and schemes.
 
 ---
 
-## About me
+## Who this is for
 
-**Kratika Jain**
-I am an Engineering leader with 15+ years of experience designing and building systems across global fintech ecosystems.
-
-[LinkedIn](https://www.linkedin.com/in/kratika-jain-em/) | [Medium](https://medium.com/@kratikasays)
+- Engineers building or operating payment and financial systems.
+- Engineering leaders responsible for system reliability and scale.
+- Founders and CTOs making architecture and infrastructure decisions.
 
 ---
 
@@ -38,25 +35,34 @@ fintech-systems/
 ## Topics
 
 ### Architectures
-Core system design patterns where fintech diverges from general software engineering. Covers payment processing, ledger design, event streaming, reconciliation, fraud and risk systems, FX engines, KYC pipelines, card issuance, open banking integrations, and financial data infrastructure.
+System design patterns specific to fintech systems, including payment processing, ledgers, reconciliation, event-driven systems, fraud and risk infrastructure, FX engines, and integrations with financial institutions.
 
 ### Failures
-The failure modes that define fintech engineering: duplicate payments, race conditions in balance updates, ledger drift, cascade failures across payment rails, silent data corruption, compliance gaps, and operational mistakes at scale. Understanding these is table stakes for senior engineers in the domain.
+Failure modes that define fintech engineering: duplicate payments, race conditions, ledger drift, reconciliation mismatches, settlement ambiguity, and cascading failures across payment rails.
 
 ### Trade-offs
-Design decisions with real financial and operational consequences: consistency vs availability in payment systems, synchronous vs async flows, build vs buy, event sourcing vs CRUD, data residency, and operating in regulated environments where the cost of being wrong is asymmetric.
+Design decisions with real financial consequences: consistency vs availability, synchronous vs asynchronous flows, build vs buy, event sourcing vs CRUD, and operating in regulated environments.
 
 ### Deep Dives
-End-to-end explorations of how financial systems actually work: card network mechanics, SWIFT and correspondent banking, Faster Payments, SEPA, ACH, ISO 20022, FX markets, and engineering case studies from Stripe, Wise, Monzo, and others.
+End-to-end explorations of how financial systems actually work: card networks, SWIFT, Faster Payments, SEPA, ACH, ISO 20022, and infrastructure patterns used by companies like Stripe, Wise, and Adyen.
+
+---
+
+## About me
+
+#### Kratika Jain
+Engineering Leader: Fintech Systems, Reliability, and Scaling Teams
+
+[LinkedIn](https://www.linkedin.com/in/kratika-jain-em/) | [Medium](https://medium.com/@kratikasays)
 
 ---
 
 ## Status
 
-This is a living repository. Documents are added incrementally. Contributions, corrections, and discussion are welcome via issues.
+This is a living repository. Topics are added incrementally and prioritised based on real-world relevance and operational impact.
 
 ---
 
 ## Licence
 
-All content is original and © Kratika Jain. You are welcome to reference and link to any document here. Please do not reproduce content wholesale without attribution.
+All content is original and © Kratika Jain. You are welcome to reference and link with attribution.
