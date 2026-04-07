@@ -1,13 +1,19 @@
 # Idempotency in Payment Systems
 
 ## Context
-Idempotency is a property of a system's operation or a request that produces the same results whether it is executed once or many times. In a distributed environment, it is not uncommon for networks to become unavailable at times, or server crash happening mid request. For a payment system, these cases could lead to client retrying the payment request, and without idempotency, the risk is of duplicate processing (a customer charged twice, or a refund processed again etc.).
+Idempotency is a property of a system's operation or a request that produces the same results whether it is executed once or many times. In a distributed environment, it is not uncommon for networks to become unavailable at times, or server crash happening mid request. 
 
-In these failures, the financial impact is immediate, reconciliation burden is significant and the trust damage could be lasting. 
+In payment systems, this is not just a technical concern. Without idempotency:
+
+- Customers can be charged multiple times.
+- Refunds can be duplicated.
+- Ledger entries can drift.
+- Reconciliation complexity increases significantly.
+- The financial and reputational impact is immediate.
 
 ---
 
-## Example problem
+## The problem
 Consider a client submitting a payment request to API. The request reaches the server and payment is processed succesfully. But a network unavailability caused the response to never make it back to the client. The client has no idea if the payment is processed or not, and they retries. 
 
 **Without idempotency**
@@ -239,9 +245,9 @@ For most teams: **database-backed idempotency, with the payment and key committe
 
 ## Further Reading
  
-- [Stripe: Idempotent Requests](https://stripe.com/docs/api/idempotent_requests):- The gold standard for communicating the idempotency contract to API consumers.
-- [Brandur Leach: Implementing Stripe-like Idempotency Keys in Postgres](https://brandur.org/idempotency-keys):- The most thorough technical treatment of database-backed idempotency available publicly.
-- [Baeldung: Idempotent REST API in Spring](https://www.baeldung.com/rest-api-idempotence):- A Java/Spring-focused walkthrough, useful for onboarding engineers to the concept.
-- [Designing Data-Intensive Applications: Chapter 9](https://dataintensive.net/):- Kleppmann's treatment of exactly-once semantics and what distributed systems can and cannot guarantee. The theoretical foundation.
+- [Stripe: Idempotent Requests](https://stripe.com/docs/api/idempotent_requests): The gold standard for communicating the idempotency contract to API consumers.
+- [Brandur Leach: Implementing Stripe-like Idempotency Keys in Postgres](https://brandur.org/idempotency-keys): The most thorough technical treatment of database-backed idempotency available publicly.
+- [Baeldung: Idempotent REST API in Spring](https://www.baeldung.com/rest-api-idempotence): A Java/Spring-focused walkthrough, useful for onboarding engineers to the concept.
+- [Designing Data-Intensive Applications: Chapter 9](https://dataintensive.net/): Kleppmann's treatment of exactly-once semantics and what distributed systems can and cannot guarantee. The theoretical foundation.
  
 ---
