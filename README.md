@@ -2,6 +2,7 @@
 A structured knowledge library on building systems in fintech, covering architectures, failure modes, trade-offs, and deep explorations of how financial systems actually work.
 > For operational and leadership strategies, see [EM-Playbook](https://github.com/kratika-jain-em/em-playbook)
 
+> For topics, see [GLOSSARY](GLOASSARY.md)
 ---
 
 ## About This Repository
