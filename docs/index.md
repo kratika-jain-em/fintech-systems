@@ -1,3 +1,12 @@
+
+
+---
+layout: default
+title: Payment Systems Advisory
+description: Helping fintech teams stabilise payment systems, design architecture, and improve engineering execution.
+image: preview.png
+---
+
 # How I Work with Fintech Teams
 
 I help fintech startups build and operate **reliable, production-grade payment systems**, across architecture, engineering execution, and real-world constraints.
