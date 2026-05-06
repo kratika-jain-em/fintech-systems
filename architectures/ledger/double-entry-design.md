@@ -322,6 +322,5 @@ The engineering lesson is not that ledgers are hard. It is that a ledger without
 
 - [TigerBeetle: Debit/Credit Concepts](https://docs.tigerbeetle.com/concepts/debit-credit/)
 - [Martin Fowler: Accounting Patterns](https://martinfowler.com/eaaDev/AccountingNarrative.html)
-- [Monzo Engineering: How We Built Transaction Isolation](https://monzo.com/blog/2017/11/02/how-we-built-transaction-isolation) 
 - [Synapse Financial Collapse: Analysis](https://www.yalejournal.org/publications/the-synapse-collapse)
 - [Designing Data-Intensive Applications: Chapter 7 - Transactions](https://dataintensive.net/) 
