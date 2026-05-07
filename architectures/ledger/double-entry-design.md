@@ -1,9 +1,10 @@
 # Double-Entry Ledger design in payments
 
-
-## Context
-
-Most fintech engineering teams build a payments table first and a ledger later, or may be after the first reconciliation break, or the first support ticket that cannot be answered, or when a regulator asks for an audit trail that does not exist.
+Most fintech engineering teams build a payments table first and a ledger later. Usually after: 
+ - first reconciliation break
+ - first support ticket that cannot be answered
+ - the first settlement discrepancy
+ - or the first audit request the system cannot answer
 
 Retrofitting double-entry into a system not designed for it is one of the most expensive engineering projects a fintech undertakes. The schema decisions made in week two of an MVP determine whether the system is auditable, reconcilable, and correct three years later.
 
@@ -13,19 +14,24 @@ Retrofitting double-entry into a system not designed for it is one of the most e
 
 ## The decisions that actually matter
 
-Before any schema and code, these are the four decisions that determine the character of your ledger:
+Before schema design, APIs, or infrastructure, four architectural decisions define the quality of a ledger system.
 
-**1. Immutability is non-negotiable.** Ledger entries must never be updated or deleted. Corrections are posted as reversals, new entries that cancel the original. If your ORM makes it easy to `UPDATE` a ledger row, you might have a governance problem, not just an engineering one. Regulators do not accept "we corrected it" without an audit trail showing what changed and when.
+**1. Immutability is non-negotiable:** Ledger entries must never be updated or deleted. Corrections are posted as reversals, new entries that cancel the original. If a ledger row can be modified with a simple UPDATE, the system no longer has a reliable audit trail. In payments, regulators and auditors care less about whether mistakes happen and more about whether the system preserves evidence of what changed, when, and why.
 
-**2. Balances are derived, not stored.** Computing balances from entries is the correct default. It eliminates an entire class of synchronisation bug. The moment you store a balance alongside the ledger, you have two sources of truth and a window for them to diverge. 
+**2. Balances are derived, not stored:** Balances should always be derivable from immutable ledger entries. Cached balances, projections, and materialised views are fine for performance, but they are derived artefacts, not authoritative state. A production payment system should always be able to rebuild balances from entries, replay history, and reconstruct account state at any point in time.
 
-**3. The write path and read path have different requirements.** Posting a transaction needs strong consistency and isolation. Reading a balance or generating a report does not. Coupling both to the same transactional database is the most common ledger architecture mistake in production. CQRS: separating the write model from the read model becomes necessary earlier.
+**3. Payment state is not same as the ledger state:** A payment lifecycle (pending, authorized, captured, settled, & reversed) is not the same thing as ledger lifecycle. Not every payment event needs to be a ledger entry. The payment state machine represents operational progress, while ledger represents financial truth. 
 
-**4. Reconciliation is an engineering pipeline, not a finance team exercise.** If your reconciliation happens monthly, in a spreadsheet, run by someone in finance, it is like accumulating breaks invisibly. **The Synapse Financial collapse** in 2024 was a ledger-reconciliation failure at scale. Automated daily reconciliation with exception alerting is an engineering obligation, not a nice-to-have.
+**4. Reconciliation is an engineering system:** Reconcilation is not a monthly-spreadsheet activity handled by the finance team. A payment platform should continously reconcile internal ledger balances, bank settlement balances, etc. with automated exception detection. **The Synapse Financial collapse** in 2024 is a reminder of what happens when ledger integrity and reconciliation drift apartover time. 
 
 ---
 
-## Schema
+## A minimal ledger-scheme
+
+A production-grade ledger system is highly sophisticated, but most begin with three core concepts. 
+- accounts
+- transactions
+- ledger-entries
 
 ```sql
 -- Accounts: any entity that holds a balance
@@ -44,15 +50,15 @@ CREATE TABLE accounts (
 -- Transactions: the business event header
 -- one transaction produces two or more ledger entries
 CREATE TABLE transactions (
-    id               UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    reference        VARCHAR(255)  NOT NULL UNIQUE,  -- idempotency key
-    transaction_type VARCHAR(50)   NOT NULL,
-    status           VARCHAR(20)   NOT NULL DEFAULT 'posted',
-    currency         CHAR(3)       NOT NULL,
-    amount           NUMERIC(19,4) NOT NULL CHECK (amount > 0),
-    description      TEXT,
-    posted_at        TIMESTAMPTZ   NOT NULL DEFAULT NOW(),
-    metadata         JSONB
+    id                  UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    reference           VARCHAR(255) NOT NULL UNIQUE,
+    transaction_type    VARCHAR(50)  NOT NULL,
+    status              VARCHAR(20)  NOT NULL,
+    currency            CHAR(3)      NOT NULL,
+    amount              NUMERIC(19,4) NOT NULL CHECK (amount > 0),
+    effective_at        TIMESTAMPTZ NOT NULL,
+    created_at          TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    metadata            JSONB
 );
 
 -- Ledger entries: the immutable accounting record
@@ -66,24 +72,20 @@ CREATE TABLE ledger_entries (
     currency       CHAR(3)       NOT NULL,
     created_at     TIMESTAMPTZ   NOT NULL DEFAULT NOW()
 );
-
-CREATE INDEX idx_ledger_entries_account     ON ledger_entries (account_id, created_at DESC);
-CREATE INDEX idx_ledger_entries_transaction ON ledger_entries (transaction_id);
 ```
+### Important schema decisions
 
-**Three decisions embedded in this schema worth calling out:**
-
-Amounts are always positive and sign is carried by `entry_type`. This eliminates the class of bug where a negative credit and a positive debit are confused. It also makes the balance calculation unambiguous.
-
-`NUMERIC(19,4)` for monetary values are non-negotiable. Floating point arithmetic is not exact and rounding errors accumulate. Four decimal places covers most currencies; adjust the scale for currencies with unusual precision requirements (JPY uses 0, KWD uses 3).
-
-No need for a `balance` column on `accounts`, read the **"balance caching"** section below.
+- **Amounts should always be positive.** The direction of money movement comes from `entry-type`. 
+- **Never use floating point for money.** `NUMERIC()` or equivalent decimal precision points are standards. Arithmetic operations on floating point introduces rounding drift. The acceptable precision depends on currency (JPY uses 0, KWD uses 3 decimal points). 
 
 ---
 
-## Enforcing invariant, the write path
+## Enforcing the accounting variant
+The core variant of double-entry accounting is simple -
+ > **total debits must equal to total credits**
 
-The double-entry invariant, every transaction's debits equal its credits, must be enforced at the database level, not just in application code. Application-level invariants fail silently under concurrent load.
+ This shouldn't only exist in the application code, but also at the database/storage layer. One common approach in PostgrSQL is `deferred` constraint. 
+
 
 ```sql
 -- Deferred constraint trigger: fires after transaction commit,
@@ -102,9 +104,9 @@ BEGIN
     WHERE transaction_id = NEW.transaction_id;
 
     IF debit_total <> credit_total THEN
-        RAISE EXCEPTION 'Unbalanced transaction %: debits=% credits=%',
-            NEW.transaction_id, debit_total, credit_total;
+        RAISE EXCEPTION 'Unbalanced transaction %', NEW.transaction_id;
     END IF;
+
     RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
@@ -115,60 +117,7 @@ CREATE CONSTRAINT TRIGGER enforce_double_entry
     FOR EACH ROW EXECUTE FUNCTION check_transaction_balance();
 ```
 
-> `DEFERRABLE INITIALLY DEFERRED` is the critical detail. Without it, the constraint fires after each individual insert, which means the first entry of a pair always fails the balance check. Deferred execution means it fires at transaction commit, after both entries exist.
-
-```java
-@Service
-@RequiredArgsConstructor
-public class LedgerService {
-
-    private final TransactionRepository transactionRepository;
-    private final LedgerEntryRepository ledgerEntryRepository;
-
-    @Transactional
-    public Transaction post(
-            String reference,
-            UUID debitAccountId,
-            UUID creditAccountId,
-            BigDecimal amount,
-            TransactionType type) {
-
-        // Idempotency — return existing if already posted
-        return transactionRepository.findByReference(reference)
-            .orElseGet(() -> createEntries(
-                reference, debitAccountId, creditAccountId, amount, type));
-    }
-
-    private Transaction createEntries(
-            String reference, UUID debitId, UUID creditId,
-            BigDecimal amount, TransactionType type) {
-
-        if (debitId.equals(creditId)) {
-            throw new InvalidTransactionException("Debit and credit accounts must differ");
-        }
-
-        Transaction tx = transactionRepository.save(Transaction.builder()
-            .reference(reference)
-            .transactionType(type)
-            .amount(amount)
-            .postedAt(Instant.now())
-            .build());
-
-        ledgerEntryRepository.saveAll(List.of(
-            LedgerEntry.builder()
-                .transactionId(tx.getId()).accountId(debitId)
-                .entryType(EntryType.DEBIT).amount(amount).build(),
-            LedgerEntry.builder()
-                .transactionId(tx.getId()).accountId(creditId)
-                .entryType(EntryType.CREDIT).amount(amount).build()
-        ));
-
-        return tx;
-    }
-}
-```
-
-> Retry storms on the write path without idempotency produce duplicate ledger entries that are extremely difficult to unwind.
+> Without `DEFERRABLE INITIALLY DEFERRED`, the first ledger entry inserted into a transaction would fail immediately because its balancing pair does not yet exist.
 
 ---
 
@@ -236,7 +185,34 @@ public Transaction post(...) {
     return tx;
 }
 ```
+---
 
+## Multi-currency system complexity
+Multi-currency systems have one rule - ***the exchange rate used at posting time is the only rate that matters***.
+
+Looking up FX-rate during reporting can create reconstruction error. Hence, it is necessary to store `source amount`, `source currency`, `target amount`, `target currency`, `exchange rate`, and `timestamp` at the posting time. 
+
+```sql
+-- Extend transactions for FX
+ALTER TABLE transactions ADD COLUMN source_currency  CHAR(3);
+ALTER TABLE transactions ADD COLUMN source_amount    NUMERIC(19,4);
+ALTER TABLE transactions ADD COLUMN target_currency  CHAR(3);
+ALTER TABLE transactions ADD COLUMN target_amount    NUMERIC(19,4);
+ALTER TABLE transactions ADD COLUMN exchange_rate    NUMERIC(19,10);  -- high precision
+ALTER TABLE transactions ADD COLUMN rate_locked_at   TIMESTAMPTZ;
+ALTER TABLE transactions ADD COLUMN rate_provider    VARCHAR(100);
+```
+
+Three decisions that matter in multi-currency:
+- **Lock and store the rate at posting time.** The transaction record must contain the exact rate used. This is not just good practice, but required for any dispute resolution, regulatory inquiry, or audit.
+- **Use clearing accounts for FX legs.** A cross-currency payment between a GBP source account and EUR destination account posts through GBP and EUR clearing accounts. The clearing accounts absorb the conversion. 
+- **Use `HALF_EVEN` rounding consistently.** `HALF_UP` accumulates rounding bias over large transaction volumes. `HALF_EVEN` (Banker's rounding) distributes it. Make this a team standard, not an individual developer decision, one inconsistent rounding call in a fee calculation compounds into a reconciliation break at scale.
+
+```java
+BigDecimal converted = sourceAmount
+    .multiply(exchangeRate)
+    .setScale(targetCurrencyScale, RoundingMode.HALF_EVEN);
+```
 ---
 
 ## TigerBeetle, if (and when) to consider it
@@ -263,46 +239,11 @@ The pattern gaining traction in 2025/2026 is a two-layer approach: TigerBeetle a
 
 ---
 
-## Multi-currency
-
-Multi-currency adds one hard problem: the exchange rate that applied when money moved is the only rate that matters. A rate looked up at query time for a historical transaction is a reconstruction error.
-
-```sql
--- Extend transactions for FX
-ALTER TABLE transactions ADD COLUMN source_currency  CHAR(3);
-ALTER TABLE transactions ADD COLUMN source_amount    NUMERIC(19,4);
-ALTER TABLE transactions ADD COLUMN target_currency  CHAR(3);
-ALTER TABLE transactions ADD COLUMN target_amount    NUMERIC(19,4);
-ALTER TABLE transactions ADD COLUMN exchange_rate    NUMERIC(19,10);  -- high precision
-ALTER TABLE transactions ADD COLUMN rate_locked_at   TIMESTAMPTZ;
-ALTER TABLE transactions ADD COLUMN rate_provider    VARCHAR(100);
-```
-
-Three decisions that matter in multi-currency:
-
-**Lock and store the rate at posting time.** The transaction record must contain the exact rate used. This is not just good practice, but required for any dispute resolution, regulatory inquiry, or audit.
-
-**Use clearing accounts for FX legs.** A cross-currency payment between a GBP source account and EUR destination account posts through GBP and EUR clearing accounts. The clearing accounts absorb the conversion. 
-
-**Use `HALF_EVEN` rounding consistently.** `HALF_UP` accumulates rounding bias over large transaction volumes. `HALF_EVEN` (Banker's rounding) distributes it. Make this a team standard, not an individual developer decision, one inconsistent rounding call in a fee calculation compounds into a reconciliation break at scale.
-
-```java
-BigDecimal converted = sourceAmount
-    .multiply(exchangeRate)
-    .setScale(targetCurrencyScale, RoundingMode.HALF_EVEN);
-```
-
----
-
 ## What I'd Recommend
 
 **Start with derived balances, not cache.** Add caching only when you have a measured, production performance problem. The synchronisation bug that emerges from premature balance caching is subtle, takes days to detect, and is painful to audit.
 
-**Enforce the invariant at the database level.** The deferred constraint trigger is not optional in a production system. Application-level enforcement fails under concurrent load exactly when you can least afford it.
-
 **Build CQRS into the design early, even if you do not implement the read model immediately.** Design the write path to publish events. When you need the read model (and you will), you can build the projection without changing the write path.
-
-**If you are starting from scratch and expect significant volume, evaluate TigerBeetle seriously.** Not as a replacement for your entire data stack, as a specialised write layer. The engineering investment is real, but so is the operational simplicity of having the accounting invariants enforced below the application layer.
 
 **Treat reconciliation as an engineering team responsibility.** Daily automated reconciliation with exception alerting is not a finance tool, it is a production health signal. If reconciliation breaks are accumulating undetected between monthly reviews, you are operating with incomplete information about the state of your system.
 
