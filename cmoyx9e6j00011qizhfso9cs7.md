@@ -3,6 +3,7 @@ title: "Do you need a PSD2 licence?"
 datePublished: 2026-05-09T22:35:01.779Z
 cuid: cmoyx9e6j00011qizhfso9cs7
 slug: do-you-need-a-psd2-licence
+cover: https://cdn.hashnode.com/uploads/covers/69e52c6413e74eec5844b8cb/4ec3f8cd-1345-4f3b-9b8f-e242a5c448e3.png
 ogImage: https://cdn.hashnode.com/uploads/og-images/69e52c6413e74eec5844b8cb/d9c3713f-69a4-452e-acaa-951def980b32.png
 
 ---
