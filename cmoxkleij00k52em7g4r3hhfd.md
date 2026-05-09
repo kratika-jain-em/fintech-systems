@@ -1,9 +1,10 @@
 ---
-title: "PSD2, PSD3 & PSR: A Primer for Engineers"
+title: "PSD2, PSD3 & PSR: Starting point"
 seoTitle: "psd2-psd3-psr-base"
 datePublished: 2026-05-08T23:52:40.893Z
 cuid: cmoxkleij00k52em7g4r3hhfd
 slug: primer
+cover: https://cdn.hashnode.com/uploads/covers/69e52c6413e74eec5844b8cb/76d75baf-ea75-4d3e-8bb0-15f85bb5584d.png
 
 ---
 
