@@ -5,6 +5,7 @@ datePublished: 2026-05-08T23:52:40.893Z
 cuid: cmoxkleij00k52em7g4r3hhfd
 slug: primer
 cover: https://cdn.hashnode.com/uploads/covers/69e52c6413e74eec5844b8cb/76d75baf-ea75-4d3e-8bb0-15f85bb5584d.png
+ogImage: https://cdn.hashnode.com/uploads/og-images/69e52c6413e74eec5844b8cb/6326c054-c6a8-429a-9217-4293891fc015.png
 
 ---
 
