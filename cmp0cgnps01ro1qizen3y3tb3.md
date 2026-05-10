@@ -4,7 +4,7 @@ seoTitle: "Hero engineer risk"
 datePublished: 2026-05-10T22:28:21.138Z
 cuid: cmp0cgnps01ro1qizen3y3tb3
 slug: hero-engineer-biggest-risk
-cover: https://cdn.hashnode.com/uploads/covers/69e52c6413e74eec5844b8cb/56303032-159e-494b-9b18-ee1951b78160.png
+cover: https://cdn.hashnode.com/uploads/covers/69e52c6413e74eec5844b8cb/d59427f8-bb92-42cb-84fa-3eeebd6988ea.png
 
 ---
 
