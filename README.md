@@ -1,8 +1,10 @@
 # fintech-systems
-A structured knowledge library on building systems in fintech, covering architectures, failure modes, trade-offs, and deep explorations of how financial systems actually work.
-> For operational and leadership strategies, see [EM-Playbook](https://github.com/kratika-jain-em/em-playbook)
 
-> For topics, see [GLOSSARY](GLOASSARY.md)
+Engineering depth for fintech; payment architecture, regulatory systems, and technical leadership.
+
+> For topics in this repository, see [GLOSSARY](GLOASSARY.md)
+
+> **IMPORTANT: Further articles are moved to [Kratika Jain](https://kratikajain.com/). This repo is obsolete now. Pease refer to the link for all latest topics.** 
 ---
 
 ## About This Repository
