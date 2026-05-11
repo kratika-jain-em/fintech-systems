@@ -5,6 +5,7 @@ datePublished: 2026-05-10T22:28:21.138Z
 cuid: cmp0cgnps01ro1qizen3y3tb3
 slug: hero-engineer-biggest-risk
 cover: https://cdn.hashnode.com/uploads/covers/69e52c6413e74eec5844b8cb/d59427f8-bb92-42cb-84fa-3eeebd6988ea.png
+ogImage: https://cdn.hashnode.com/uploads/og-images/69e52c6413e74eec5844b8cb/accfd47d-00cc-4a53-b459-6acf65e47d63.png
 
 ---
 
