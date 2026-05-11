@@ -8,6 +8,8 @@ ogImage: https://cdn.hashnode.com/uploads/og-images/69e52c6413e74eec5844b8cb/d9c
 
 ---
 
+> Start from here - [Primer](http://Start from here - Series Primer)
+
 One of the easiest mistake by a payments/fintech startup is to start with the product flow and leave the regulatory model for later. This may sound practical at the beginning to build the app/platform, integrate with bank, & sort the compliance when traction appears. In reality, the order can become expensive very quickly.
 
 > PSD2 is not just a regulatory document, it shapes what the system is allowed to do, who can touch funds, who can access account data, who authenticates the customer, who owns consent, who keeps evidence, & and who is liable if (or when) something goes wrong.
@@ -290,3 +292,5 @@ These five things should happen before serious architecture decisions are made.
     
 
 * * *
+
+> Next in series: [PSD participants map](https://kratikajain.com/the-psd2-participants-map)
