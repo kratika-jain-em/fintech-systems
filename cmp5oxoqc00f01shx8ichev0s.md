@@ -1,6 +1,6 @@
 ---
 title: "What I look for while evaluating a payment system!"
-seoTitle: "Technical health of payment system"
+seoTitle: "Evaluate technical health of a payment system"
 datePublished: 2026-05-14T16:16:21.898Z
 cuid: cmp5oxoqc00f01shx8ichev0s
 slug: tdd-payment-system
