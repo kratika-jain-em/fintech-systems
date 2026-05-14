@@ -1,10 +1,11 @@
 ---
 title: "What I look for while evaluating a payment system!"
-seoTitle: "Eva"
+seoTitle: "Technical health of payment system"
 datePublished: 2026-05-14T16:16:21.898Z
 cuid: cmp5oxoqc00f01shx8ichev0s
-slug: what-i-look-for-while-evaluating-a-payment-system
+slug: tdd-payment-system
 cover: https://cdn.hashnode.com/uploads/covers/69e52c6413e74eec5844b8cb/f1aba593-cf38-448b-ae6c-7a2b4db22732.png
+ogImage: https://cdn.hashnode.com/uploads/og-images/69e52c6413e74eec5844b8cb/5713a494-89fb-43e2-ac41-d7a7a951c405.png
 tags: payment-systems, fintech-startups, fintech-software-development, technical-due-diligence
 
 ---
