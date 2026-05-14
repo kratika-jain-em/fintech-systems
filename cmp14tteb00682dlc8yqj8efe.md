@@ -9,6 +9,8 @@ tags: payments, payment-systems, double-entry-ledger
 
 ---
 
+**%%\[sign-upform\]**
+
 Most fintech engineering teams build a payments table first and a ledger later. Usually after:
 
 *   first reconciliation break
